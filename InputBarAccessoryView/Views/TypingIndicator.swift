@@ -43,7 +43,8 @@ open class TypingIndicator: UIView, InputItem {
     
     /// An array of names/ids that will be parsed and displayed as the typing users
     public private(set) var usersTyping: [String] = []
-    
+    public private(set) var replying: String? = nil
+
     open let label: UILabel = {
         let label = UILabel()
         label.font = UIFont.boldSystemFont(ofSize: 15)
@@ -94,8 +95,8 @@ open class TypingIndicator: UIView, InputItem {
         let isTyping = usersTyping.count != 0
         separatorLine.isHidden = !isTyping
         inputBarAccessoryView?.separatorLine.backgroundColor = isTyping ? .clear : .lightGray
-        labelConstraintSet?.top?.constant = isTyping ? 2 : 0
-        labelConstraintSet?.bottom?.constant = isTyping ? -2 : 0
+        labelConstraintSet?.top?.constant = isTyping ? 5 : 0
+        labelConstraintSet?.bottom?.constant = isTyping ? -5 : 0
         
         // Assumes being placed in the topStackView which is constrained to safeArea, thus the extra space behind the topStackView should be set to backgroundColor
         inputBarAccessoryView?.backgroundColor = isTyping ? backgroundColor : inputBarAccessoryView?.backgroundView.backgroundColor
@@ -122,6 +123,31 @@ open class TypingIndicator: UIView, InputItem {
         invalidateIntrinsicContentSize()
     }
     
+    open func setReplying(to comment: String?) {
+        
+        replying = comment
+        // Make some UI changes
+        let isReplying = (comment != nil)
+        separatorLine.isHidden = !isReplying
+        inputBarAccessoryView?.separatorLine.backgroundColor = isReplying ? .clear : .lightGray
+        labelConstraintSet?.top?.constant = isReplying ? 2 : 0
+        labelConstraintSet?.bottom?.constant = isReplying ? -2 : 0
+        
+        // Assumes being placed in the topStackView which is constrained to safeArea, thus the extra space behind the topStackView should be set to backgroundColor
+        inputBarAccessoryView?.backgroundColor = isReplying ? backgroundColor : inputBarAccessoryView?.backgroundView.backgroundColor
+        
+        let fontSize = label.font.pointSize
+        let textColor = label.textColor ?? .darkGray
+        if isReplying {
+            label.attributedText = NSMutableAttributedString()
+                .bold("Replying to: ", fontSize: fontSize, textColor: textColor)
+                .normal(replying ?? "", fontSize: fontSize, textColor: textColor)
+        } else {
+            label.attributedText = nil
+        }
+        invalidateIntrinsicContentSize()
+    }
+
     // MARK: - API [Private]
     
     private func setup() {
