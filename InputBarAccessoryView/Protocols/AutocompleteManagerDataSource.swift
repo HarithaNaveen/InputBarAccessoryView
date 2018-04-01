@@ -27,6 +27,7 @@
 
 import UIKit
 
+public typealias AutoCompletionHandler = (_ completions: [AutocompleteCompletion]) -> Void
 /// AutocompleteManagerDataSource is a protocol that passes data to the AutocompleteManager
 public protocol AutocompleteManagerDataSource: class {
     
@@ -36,7 +37,7 @@ public protocol AutocompleteManagerDataSource: class {
     ///   - manager: The AutocompleteManager
     ///   - prefix: The registered prefix
     /// - Returns: An array of `AutocompleteCompletion` options for the given prefix
-    func autocompleteManager(_ manager: AutocompleteManager, autocompleteSourceFor prefix: String) -> [AutocompleteCompletion]
+    func autocompleteManager(_ manager: AutocompleteManager, autocompleteSourceFor prefix: String, completion: @escaping AutoCompletionHandler)
     
     /// The cell to populate the `AutocompleteTableView` with
     ///

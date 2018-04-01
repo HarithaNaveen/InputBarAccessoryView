@@ -133,12 +133,42 @@ open class AutocompleteManager: NSObject, InputManager {
     }
     
     /// The current autocomplete text options filtered by the text after the prefix
-    private var currentAutocompleteOptions: [AutocompleteCompletion] {
+    private var currentAutocompleteOptions: [AutocompleteCompletion] = []
+    
+    public func loadAutoCompletions() {
+        guard let session = currentSession else {
+            self.currentAutocompleteOptions = []
+            self.tableView.reloadData()
+            // Resize the table to be fit properly in an `InputStackView`
+            self.tableView.invalidateIntrinsicContentSize()
+            
+            // Layout the table's superview
+            self.tableView.superview?.layoutIfNeeded()
+            return
+        }
+        guard !session.filter.isEmpty else {
+            self.currentAutocompleteOptions = []
+            self.tableView.reloadData()
+            // Resize the table to be fit properly in an `InputStackView`
+            self.tableView.invalidateIntrinsicContentSize()
+            
+            // Layout the table's superview
+            self.tableView.superview?.layoutIfNeeded()
+            return
+        }
         
-        guard let session = currentSession, let completions = dataSource?.autocompleteManager(self, autocompleteSourceFor: session.prefix) else { return [] }
-        guard !session.filter.isEmpty else { return completions }
-        guard isCaseSensitive else { return completions.filter { $0.text.lowercased().contains(session.filter.lowercased()) } }
-        return completions.filter { $0.text.contains(session.filter) }
+        dataSource?.autocompleteManager(self, autocompleteSourceFor: session.prefix) { (autocompletions) in
+            DispatchQueue.main.async {
+                self.currentAutocompleteOptions = autocompletions
+                self.tableView.reloadData()
+                
+                // Resize the table to be fit properly in an `InputStackView`
+                self.tableView.invalidateIntrinsicContentSize()
+                
+                // Layout the table's superview
+                self.tableView.superview?.layoutIfNeeded()
+            }
+        }
     }
     
     // MARK: - Initialization
@@ -289,14 +319,7 @@ open class AutocompleteManager: NSObject, InputManager {
     
     /// Calls the required methods to relayout the `AutocompleteTableView` in it's superview
     private func layoutIfNeeded() {
-        
-        tableView.reloadData()
-        
-        // Resize the table to be fit properly in an `InputStackView`
-        tableView.invalidateIntrinsicContentSize()
-        
-        // Layout the table's superview
-        tableView.superview?.layoutIfNeeded()
+        loadAutoCompletions()
     }
     
 }
