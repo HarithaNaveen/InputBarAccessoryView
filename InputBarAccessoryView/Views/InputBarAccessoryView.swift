@@ -772,7 +772,5 @@ open class InputBarAccessoryView: UIView {
     /// Invalidates each of the inputManagers
     open func didSelectSendButton() {
         delegate?.inputBar(self, didPressSendButtonWith: inputTextView.text)
-        inputTextViewDidChange()
-        inputManagers.forEach { $0.invalidate() }
     }
 }
